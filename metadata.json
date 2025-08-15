@@ -1,0 +1,5 @@
+{
+  "name": "Neon Snake Game",
+  "description": "A visually appealing, modern take on the classic snake game, featuring a neon-noir aesthetic. Control the snake to eat the food and grow longer, but avoid hitting the walls or your own tail.",
+  "requestFramePermissions": []
+}
