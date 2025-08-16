@@ -12,7 +12,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-4 font-mono">
       <header className="relative text-center mb-4">
         <h1 className="text-5xl md:text-7xl font-bold text-cyan-400" style={{ textShadow: '0 0 10px #06b6d4, 0 0 20px #06b6d4' }}>
-          NEON SNAKY BOY
+          NEON SNAKEY BOI
         </h1>
         <p className="text-gray-400 mt-2">A retro-futuristic classic</p>
       </header>
@@ -61,7 +61,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="text-gray-500 text-sm mt-8 text-center">
-        <p>Use Arrow Keys or WASD to move. Space or P to pause.</p>
+        <p>Use Arrow Keys, WASD, or Swipe to move. Space or P to pause.</p>
         <p>EvilX.</p>
       </footer>
     </div>

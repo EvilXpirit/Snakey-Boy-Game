@@ -105,6 +105,7 @@ export const useGameLogic = () => {
   const [gameState, dispatch] = useReducer(gameReducer, createInitialState());
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [touchStart, setTouchStart] = useState<Coordinate | null>(null);
 
   const togglePause = useCallback(() => {
     if (isPlaying && !gameState.isGameOver) {
@@ -114,20 +115,21 @@ export const useGameLogic = () => {
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     let newDirection: Direction | null = null;
-    switch (e.key) {
-      case 'ArrowUp':
+    const key = e.key.toLowerCase();
+    switch (key) {
+      case 'arrowup':
       case 'w':
         newDirection = Direction.UP;
         break;
-      case 'ArrowDown':
+      case 'arrowdown':
       case 's':
         newDirection = Direction.DOWN;
         break;
-      case 'ArrowLeft':
+      case 'arrowleft':
       case 'a':
         newDirection = Direction.LEFT;
         break;
-      case 'ArrowRight':
+      case 'arrowright':
       case 'd':
         newDirection = Direction.RIGHT;
         break;
@@ -140,17 +142,58 @@ export const useGameLogic = () => {
       e.preventDefault();
       if (isPaused) setIsPaused(false);
       dispatch({ type: 'CHANGE_DIRECTION', payload: newDirection });
-    } else if (e.key === ' ' || e.key === 'p') {
+    } else if (key === ' ' || key === 'p') {
       e.preventDefault();
     }
   }, [togglePause, isPaused]);
 
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 1) {
+      setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!touchStart || e.changedTouches.length !== 1) {
+      return;
+    }
+
+    const touchEnd = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    const diffX = touchEnd.x - touchStart.x;
+    const diffY = touchEnd.y - touchStart.y;
+    const minSwipeDistance = 30;
+
+    if (Math.abs(diffX) < minSwipeDistance && Math.abs(diffY) < minSwipeDistance) {
+      setTouchStart(null);
+      return;
+    }
+    
+    let newDirection: Direction | null = null;
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      newDirection = diffX > 0 ? Direction.RIGHT : Direction.LEFT;
+    } else {
+      newDirection = diffY > 0 ? Direction.DOWN : Direction.UP;
+    }
+
+    if (newDirection !== null) {
+      if (isPaused) setIsPaused(false);
+      dispatch({ type: 'CHANGE_DIRECTION', payload: newDirection });
+    }
+
+    setTouchStart(null);
+  }, [touchStart, isPaused]);
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [handleKeyDown]);
+  }, [handleKeyDown, handleTouchStart, handleTouchEnd]);
 
   useEffect(() => {
     if (!isPlaying || gameState.isGameOver || isPaused) {
